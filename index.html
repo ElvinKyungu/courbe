@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200vh;
+      background: linear-gradient(90deg, rgba(255, 0, 150, 0.2) 0%, rgba(0, 204, 255, 0.2) 100%);
+    }
+    svg {
+      overflow: visible;
+      position: relative;
+    }
+    .ball {
+      fill: rgba(255, 255, 255, 0.5);
+      stroke: black;
+      stroke-width: 3px;
+      position: absolute;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="flex justify-center items-center w-full h-screen">
+    <svg width="840" height="420" viewBox="0 0 1200 420">
+      <path id="snakePath" 
+        d="M 0 210 
+           C 100 210, 300 210, 400 210 
+           S 700 210, 800 210 
+           S 900 210, 1000 210 
+           S 1100 210, 1200 210"
+        fill="none" 
+        stroke="black" 
+        stroke-width="40"
+      />
+      <circle class="ball" cx="0" cy="0" r="25"/>
+    </svg>
+  </main>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ball = document.querySelector('.ball');
+    const path = document.querySelector('#snakePath');
+    const pathLength = path.getTotalLength();
+
+    gsap.to(path, {
+      duration: 2,
+      attr: {
+        d: "M 0 200 C 100 0, 300 0, 400 200 S 700 400, 800 200 S 900 0, 1000 200 S 1100 400, 1200 200"
+      },
+      ease: "power2.inOut",
+      scrollTrigger: {
+        trigger: path,
+        start: "top 100%",
+        end: "bottom top",
+        scrub: true,
+        onEnter: () => gsap.to(path, { attr: { d: "M 0 200 C 100 0, 300 0, 400 200 S 700 400, 800 200 S 900 0, 1000 200 S 1100 400, 1200 200" } }),
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      const { clientX } = e;
+      const svgRect = path.getBoundingClientRect();
+      const relativeX = clientX - svgRect.left;
+      const percentage = relativeX / svgRect.width;
+      const pointAtLength = path.getPointAtLength(percentage * pathLength);
+
+      gsap.to(ball, {
+        duration: 0.3,
+        cx: pointAtLength.x, 
+        cy: pointAtLength.y, 
+        ease: 'power2.out'
+      });
+    });
+  </script>
+</body>
+</html>
